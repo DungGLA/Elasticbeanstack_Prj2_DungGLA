@@ -1,6 +1,7 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import {filterImageFromURL, deleteLocalFiles} from './util/util';
+import {Request, Response} from "express"
 
 (async () => {
 
@@ -28,25 +29,25 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
-  app.get("/filteredimage",async (req, res) => {
-    const {image_url} = req.query
-    const validExtention = [".png", ".jpg", ".jpeg"]
-    let isValid = false
+  app.get("/filteredimage",async (req: Request, res: Response) => {
+    const image_url: string = req.query.image_url
+    const validExtention: string[] = [".png", ".jpg", ".jpeg"]
+    let isValid: boolean = false
     validExtention.forEach(extention => {
       if(image_url.endsWith(extention)) {
         isValid = true
       }
     });
     if(!isValid) {
-      res.send("Wrong image url extention (png, jpg, jpeg)")
+      res.status(400).send("Wrong image url extention (png, jpg, jpeg)")
     } else {
       try {
         const imgRes = await filterImageFromURL(image_url)
-        res.sendFile(imgRes, async () => {
+        res.status(200).sendFile(imgRes, async () => {
           await deleteLocalFiles([imgRes])
         })
       } catch (error) {
-        res.send("Wrong url image")
+        res.status(200).send("Wrong url image")
       }
     }
   })
@@ -54,7 +55,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   
   // Root Endpoint
   // Displays a simple message to the user
-  app.get( "/", async ( req, res ) => {
+  app.get( "/", async ( req: Request, res: Response ) => {
     res.send("try GET /filteredimage?image_url={{}}")
   } );
   
